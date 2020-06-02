@@ -1,0 +1,12 @@
+CREATE TABLE Parsed_Data(
+    A String,
+    B String,
+    C String,
+    D String,
+    E String,
+    F String,
+    G String,
+    H Bool,
+    I Bool,
+    J String
+)
