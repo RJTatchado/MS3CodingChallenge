@@ -1,0 +1,108 @@
+package com.tj.ms3Code;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import javax.swing.SwingWorker;
+
+public class DatabaseFunc extends SwingWorker {
+
+	@Override
+	protected Object doInBackground() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	DatabaseFunc(){
+		
+	}
+
+	/**
+	 * Connects to database "fileName"
+	 * */
+	private Connection connect(String fileName) {
+        // SQLite connection string
+        String url = "jdbc:sqlite:"+ System.getProperty("user.dir") + "\\" + fileName;
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(url);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return conn;
+    }
+	
+	/**
+	 * Create new if database
+	 * */
+	public void createDatabase(String fileName) {
+
+        String url = "jdbc:sqlite:"+ System.getProperty("user.dir") + "\\" + fileName;
+
+        try (Connection conn = DriverManager.getConnection(url)) {
+            if (conn != null) {
+                DatabaseMetaData meta = conn.getMetaData();
+                System.out.println("The driver name is " + meta.getDriverName());
+                createNewTable(url);
+                System.out.println("A new database has been created.");
+            	//main.lbl_DB_status.setText("Successfully connected to Local Database!");
+            }
+            else {
+            	//main.lbl_DB_status.setText("Successfully connected to Local Database!");
+            	System.out.println("Successfully connected to Local Database!");
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+    }
+	
+	/**
+	 * Creates the table of the output database if no tables yet*/
+	public static void createNewTable(String url) {
+        
+        // SQL statement for creating a new table
+        String sql = "CREATE TABLE IF NOT EXISTS parsed_data (\n"
+                + "	A TEXT NOT NULL,\n"
+                + "	B TEXT NOT NULL,\n"
+                + "	C TEXT NOT NULL,\n"
+                + "	D TEXT NOT NULL,\n"
+                + "	E TEXT NOT NULL,\n"
+                + "	F TEXT NOT NULL,\n"
+                + "	G TEXT NOT NULL,\n"
+                + "	H TEXT NOT NULL,\n"
+                + "	I TEXT NOT NULL,\n"
+                + "	J TEXT NOT NULL\n"
+                + ");";
+        
+        try (Connection conn = DriverManager.getConnection(url);
+                Statement stmt = conn.createStatement()) {
+            // create a new table
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+	
+	/**Insert data to SQLite Database
+	 * */
+	public void insert(String[] data) {
+        String sql = "INSERT INTO parsed_data(A,B,C,D,E,F,G,H,I,J) VALUES(?,?,?,?,?,?,?,?,?,?)";
+
+        try (Connection conn = connect("output");
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        	for(int i = 0; i < 10; i++)
+        	{
+        		pstmt.setString(i+1, data[i]);
+        	}
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+}

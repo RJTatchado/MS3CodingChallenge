@@ -1,0 +1,71 @@
+package com.tj.ms3Code;
+
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.JButton;
+import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JFileChooser;
+import java.io.File;       
+
+public class MainWindow {
+
+	private JFrame frame;
+	private JFileChooser fc;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					MainWindow window = new MainWindow();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the application.
+	 */
+	public MainWindow() {
+		initialize();
+	}
+
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		frame = new JFrame();
+		frame.setResizable(false);
+		frame.setBounds(100, 100, 450, 300);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		//set default directory of the Open Dialog Box
+		File defDir = new File(System.getProperty("user.dir"));
+		fc = new JFileChooser(defDir);
+		//File filter of Open Dialog Box
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files (*.csv)", "*.csv");
+		fc.setFileFilter(filter);
+		
+		JButton btn_selectFile = new JButton("Select csv File");
+		btn_selectFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int result = fc.showOpenDialog(frame);
+				if(result == JFileChooser.APPROVE_OPTION)
+				{
+					
+				}
+			}
+		});
+		frame.getContentPane().add(btn_selectFile, BorderLayout.NORTH);
+	}
+
+}

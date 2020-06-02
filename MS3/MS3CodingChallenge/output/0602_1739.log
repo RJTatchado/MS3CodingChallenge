@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="windows-1252" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2020-06-02T09:39:26.141036500Z</date>
+  <millis>1591090766141</millis>
+  <nanos>36500</nanos>
+  <sequence>0</sequence>
+  <logger>com.tj.ms3Code.Main</logger>
+  <level>INFO</level>
+  <class>com.tj.ms3Code.Main</class>
+  <method>log</method>
+  <thread>17</thread>
+  <message># of Records Received: 6001</message>
+</record>
+<record>
+  <date>2020-06-02T09:39:26.158222500Z</date>
+  <millis>1591090766158</millis>
+  <nanos>222500</nanos>
+  <sequence>1</sequence>
+  <logger>com.tj.ms3Code.Main</logger>
+  <level>INFO</level>
+  <class>com.tj.ms3Code.Main</class>
+  <method>log</method>
+  <thread>17</thread>
+  <message># of Records Successful: 4866</message>
+</record>
+<record>
+  <date>2020-06-02T09:39:26.159220900Z</date>
+  <millis>1591090766159</millis>
+  <nanos>220900</nanos>
+  <sequence>2</sequence>
+  <logger>com.tj.ms3Code.Main</logger>
+  <level>INFO</level>
+  <class>com.tj.ms3Code.Main</class>
+  <method>log</method>
+  <thread>17</thread>
+  <message># of Records Failed: 1135</message>
+</record>
+</log>

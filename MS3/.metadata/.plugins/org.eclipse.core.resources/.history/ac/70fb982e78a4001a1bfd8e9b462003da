@@ -1,0 +1,210 @@
+package com.tj.ms3Code;
+
+import java.awt.Button;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.List;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.*;
+
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+import com.opencsv.exceptions.CsvValidationException;
+
+public class Main extends JFrame {
+
+	private JPanel contentPane;
+	private JFileChooser fc;
+	private CSVReader csvReader;
+	private CSVWriter csvWriter;
+	private File selectedFile;
+	private JPanel panel = new JPanel();
+	private Button btn_SelectCSV = new Button("Select CSV File");
+	private JLabel lbl_FilePathTitle = new JLabel("File Path:");
+	private JLabel lbl_FilePath = new JLabel("No File Selected");
+	private JLabel lbl_Close = new JLabel("X");
+	private Button btn_Parse = new Button("Parse CSV");
+	private JProgressBar progressBar = new JProgressBar();
+	private Integer countReceived, countSuccessful, countFailed;
+	private DatabaseFunc db = new DatabaseFunc();
+	private JLabel lbl_DB_status = new JLabel("Not yet connected to database");
+	
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Main frame = new Main();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public Main() {
+		//Creates database if not existing
+		if(db.createDatabase("output")) {
+			lbl_DB_status.setText("Successfully connected to Local Database!");
+		}
+		//set Open Dialog default Directory
+		File defDir = new File(System.getProperty("user.dir"));
+		fc = new JFileChooser(defDir);
+		
+		setBackground(Color.WHITE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 635, 224);
+		setUndecorated(true);
+		setResizable(false);
+		contentPane = new JPanel();
+		contentPane.setBackground(Color.WHITE);
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		panel.setBackground(Color.DARK_GRAY);
+		panel.setBounds(-44, 0, 190, 224);
+		contentPane.add(panel);
+		
+		btn_SelectCSV.setFont(new Font("Dialog", Font.BOLD, 12));
+		btn_SelectCSV.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int result = fc.showOpenDialog(contentPane);
+				if(result == JFileChooser.APPROVE_OPTION)
+				{
+					try {
+						selectedFile = fc.getSelectedFile();
+						lbl_FilePath.setText(selectedFile.getAbsolutePath());
+						btn_Parse.setEnabled(true);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+		btn_SelectCSV.setForeground(new Color(255, 255, 255));
+		btn_SelectCSV.setBackground(new Color(102, 204, 255));
+		btn_SelectCSV.setBounds(152, 69, 450, 27);
+		contentPane.add(btn_SelectCSV);
+		
+		lbl_Close.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println("Closing java program");
+				System.exit(1);
+			}
+		});
+		lbl_Close.setForeground(new Color(255, 51, 0));
+		lbl_Close.setFont(new Font("Tahoma", Font.BOLD, 23));
+		lbl_Close.setHorizontalAlignment(SwingConstants.CENTER);
+		lbl_Close.setBounds(602, 0, 33, 27);
+		contentPane.add(lbl_Close);
+		
+		lbl_FilePathTitle.setBounds(156, 102, 64, 14);
+		contentPane.add(lbl_FilePathTitle);
+		lbl_FilePath.setBounds(242, 102, 360, 14);
+		contentPane.add(lbl_FilePath);
+		
+		btn_Parse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					String[] row = null;
+					csvReader = new CSVReader(new FileReader(selectedFile.getAbsolutePath()));
+					csvWriter = new CSVWriter(new FileWriter(defDir.getAbsolutePath()));
+
+					try {
+						countReceived = 0;
+						countSuccessful = 0;
+						countFailed = 0;
+						while((row = csvReader.readNext()) != null) {
+							Integer elementCounter = 0;
+							if(row.length == 10) {
+								for(String s : row) {
+									//check if any element is empty
+									if(!s.isEmpty())
+										elementCounter++;
+								}
+								if(elementCounter == 10) {
+									//save to database
+									db.insert(row);
+									System.out.println("Inserting" + row.toString());
+									countSuccessful++;
+								}
+								else {
+									countFailed++;
+								}
+							}
+							countReceived++;
+						}
+						csvReader.close();
+						countReceived -= 2; //remove from count the table and last iterator count
+						System.out.println("# of Records Received: " + countReceived);
+						System.out.println("# of Records Successful: " + countSuccessful);
+						System.out.println("# of Records Failed: " + countFailed);
+					} catch (CsvValidationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		btn_Parse.setEnabled(false);
+		btn_Parse.setBounds(152, 134, 70, 22);
+		
+		contentPane.add(btn_Parse);
+		
+		progressBar.setBounds(156, 187, 450, 14);
+		progressBar.setStringPainted(true); 
+		contentPane.add(progressBar);
+		
+		lbl_DB_status.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		lbl_DB_status.setHorizontalAlignment(SwingConstants.RIGHT);
+		lbl_DB_status.setBounds(341, 210, 261, 14);
+		contentPane.add(lbl_DB_status);
+	}
+	
+	private CSVWriter getWriter() {
+		File defDir = new File(System.getProperty("user.dir"));
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		try {
+			CSVWriter writer = new CSVWriter(new FileWriter(defDir.getAbsolutePath() + timestamp.getTime()));
+			return writer;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+}
